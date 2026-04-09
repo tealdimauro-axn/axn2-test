@@ -1,0 +1,83 @@
+# Translation of WooCommerce - WooCommerce FirstData Gateway - 1.0 in Spanish (Spain)
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2018-08-17 17:50+0530\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Poedit 2.0.7\n"
+"Language: es\n"
+"Project-Id-Version: WooCommerce - WooCommerce FirstData Gateway - 1.0\n"
+"POT-Creation-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+
+msgid "Card Number is a required field."
+msgstr "Número de tarjeta es un campo requerido."
+
+msgid "Card Number is invalid."
+msgstr "El numero de tarjeta es inválido."
+
+msgid "Expiry Dateis a invalid."
+msgstr "La fecha de expiración es inválida."
+
+msgid "Expiry Date is a required field."
+msgstr "Fecha de vencimiento es un campo requerido."
+
+msgid "Card CVC is invalid."
+msgstr "El código de seguridad es inválido."
+
+msgid "Card CVC is a required field."
+msgstr "Código de seguridad es un campo requerido."
+
+msgid "Pay securely with"
+msgstr "Pague de forma segura con"
+
+msgid "Full Payment"
+msgstr "1 Pago"
+
+msgid "Instalment Payment"
+msgstr "Pago a meses"
+
+msgid "Choose The Instalment"
+msgstr "Seleccione el número de meses"
+
+msgid "Use Local/Alternate Payment Method"
+msgstr "Métodos de pago alternativos"
+
+msgid "Choose Your Local Methods :"
+msgstr "Seleccione medios de pago:"
+
+msgid "Please Select:"
+msgstr "Seleccionar:"
+
+msgid "Card number"
+msgstr "Número de tarjeta"
+
+msgid "Expiry (MM/YY)"
+msgstr "Vencimiento (MM/AA)"
+
+msgid "Card code"
+msgstr "Código de seguridad"
+
+msgid "MM / YY"
+msgstr "MM / AA"
+
+msgid "CVC"
+msgstr "CVC"
+
+msgid "Thank you for your order. We are now redirecting you to FirstData to make payment."
+msgstr "Gracias. Lo estamos redirigiendo al procesador de pagos First Data para concluir su pago en forma segura."
+
+msgid "is a required field"
+msgstr "es un campo requerido"
+
+msgid "Debit/Credit"
+msgstr "Crédito/Débito"
+
+msgid "Credit Card"
+msgstr "Crédito"
+
+msgid "Debit Card"
+msgstr "Débito"

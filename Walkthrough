@@ -1,0 +1,41 @@
+# Fiserv Gateway Plugin Cloning Walkthrough
+
+## Goal
+To create a fully independent clone of the original **Wanderlust First Data / Fiserv** WooCommerce Payment Gateway plugin. The clone can be installed alongside the original plugin without any conflict, including shared global settings, allowing different Fiserv credentials and configurations to be run simultaneously.
+
+## What was done
+1. **Directory Clone**: 
+   - Created the new plugin folder `axn_fiserv_gateway`.
+   - Copied all core files, `includes/`, `templates/`, `assets/`, and `languages/` from the original plugin into the new folder.
+2. **File Renaming**: 
+   - `firstdata-gateway.php` was renamed to `axn-fiserv-gateway.php`.
+   - `firstdata.php` was renamed to `axn-fiserv.php`.
+   - The `.po` and `.pot` localization template files were also updated to match the new text domain.
+3. **Identifier Replacements**:
+   - Replaced class variations (`Wanderlust_Firstdata` -> `Axn_Fiserv`, `WANDERLUST` -> `AXN`, `wanderlust_` -> `axn_`).
+   - Replaced all string instances of `firstdata` -> `axn_fiserv` to isolate the `woocommerce_payment_gateways` ID to `axn_fiserv_gateway`.
+   - The Text Domain was updated from `woocommerce-firstdata` to `woocommerce-axn-fiserv`.
+   - Updated author names, titles, and instantiated class names inside `templates/local-payment-method.php` to prevent PHP fatal errors about missing classes.
+4. **Isolating Shared Options**:
+   - Discovered that the original gateway stores its multiple payments settings (Installment Options / Cuotas) globally as `woocommerce_multiple_paymet_gateway`.
+   - This exact variable caused conflicts between cloned plugins attempting to configure cuotas.
+   - Renamed this database option across the plugin clone to `woocommerce_axn_fiserv_multiple_payment` so that the cloned version manages its own installments explicitly without touching the original plugin's data.
+
+## Bug Fixes (Settings Page Empty / Not Loading)
+After the initial cloning, a few issues prevented the plugin from loading the Settings page correctly:
+1. **Class Registration Mismatch**: The gateway class was named `AXN_Axn_fiserv_Gateway`, but the main script was trying to register `Axn_Fiserv_Gateway`. WooCommerce quietly fails to register the plugin when the class is omitted, causing the settings link to lead to an empty page. This was fixed.
+2. **Include Paths Corrected**: The path references to helper files (`axn-fiserv-utility.php`, `axn-fiserv-settings.php`, `axn-fiserv-api-handler.php`, `axn-fiserv-request.php`, `axn-fiserv-response.php`) and Javascript files were using underscores instead of hyphens (`axn_fiserv-` instead of `axn-fiserv-`). This would cause a fatal PHP error (white screen) when loading settings. This has been corrected across all files.
+
+## Bug Fixes (Redirect URLs and Labels)
+1. **Response Success & Drop URLs Ignored**: In the original plugin, the custom success and fail URLs were retrieved from the settings but hardcoded to just use `$order->get_checkout_order_received_url()` and `$order->get_cancel_order_url()` anyway. This logic was fixed so that the configured URLs (`test_success_url`/`prod_success_url`/`test_fail_url`/`prod_fail_url`) consistently take priority during checkout form generation and API return redirects.
+2. **Reseller Label Customization**: Modified the internally hardcoded name `"Tarjeta Naranja"` to `"Tarjetas de Crédito"` globally without destroying the backend key structure that tracks transactions.
+
+## Bug Fixes (Plugin Aesthetics)
+1. **Logo Resizing (`e-posnet.png`)**: 
+   - *Backend*: Added an inline layout constraint `max-height: 52px;` to the settings array for the Dashboard Preview as requested, ensuring the uploaded image scales proportionately and natively within the original height limit constraints without overlapping the UI options.
+   - *Frontend / Checkout*: Added a WooCommerce-compatible CSS rule `max-height: 52px !important; width: auto !important;` dynamically injected into the `wp_head` hook specifically targeting `.payment_method_axn_fiserv_gateway img`. Because WooCommerce sanitizes the return array of `getIcon()` and strips inline styles from URLs, returning raw CSS via standard DOM hooks guarantees the gateway emblem matches the requested size during the purchase flow.
+
+## Validation Results
+- The cloned plugin operates seamlessly in a separate `axn_fiserv_gateway` folder.
+- All variables, text domains, and options are prepended with `axn_` or `axn_fiserv`.
+- No colliding WordPress options exist; the clone has its own storage keys.

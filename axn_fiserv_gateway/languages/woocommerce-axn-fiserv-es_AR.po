@@ -1,0 +1,117 @@
+# Translation of WooCommerce - WooCommerce FirstData Gateway - 1.0 in Spanish (Spain)
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2021-03-02 22:41+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Loco https://localise.biz/\n"
+"Language: es_AR\n"
+"Project-Id-Version: WooCommerce - WooCommerce FirstData Gateway - 1.0\n"
+"POT-Creation-Date: \n"
+"Last-Translator: \n"
+"Language-Team: Español de Argentina"
+
+#: firstdata.php:738
+msgid "Card code"
+msgstr "Código de seguridad"
+
+#: firstdata.php:1518
+msgid "Card CVC is a required field."
+msgstr "Código de seguridad es un campo requerido."
+
+#: firstdata.php:1520
+#, fuzzy
+#| msgid "Card CVC is invalid."
+msgid "Card CVC is Invalid."
+msgstr "Código de seguridad no es válido."
+
+#: firstdata.php:757
+msgid "Card number"
+msgstr "Número de tarjeta"
+
+#: firstdata.php:1505
+msgid "Card Number is a required field."
+msgstr "Número de tarjeta es un campo requerido."
+
+#: firstdata.php:1507
+#, fuzzy
+#| msgid "Card Number is invalid."
+msgid "Card Numberis is Invalid."
+msgstr "Número de tarjeta no es válido."
+
+#: templates/local-payment-method.php:21
+msgid "Choose Your Local Methods :"
+msgstr "Seleccione medios de pago:"
+
+#: firstdata.php:746
+msgid "Credit Card"
+msgstr "Tarjeta de crédito"
+
+#: firstdata.php:747
+msgid "Debit Card"
+msgstr "Tarjeta de débitoo"
+
+#: firstdata.php:744
+msgid "Debit/Credit"
+msgstr "Elija el tipo de tarjeta"
+
+#: firstdata.php:761
+msgid "Expiry (MM/YY)"
+msgstr "Vencimiento (MM/AA)"
+
+#: firstdata.php:1512
+msgid "Expiry Date is a required field."
+msgstr "Fecha de vencimiento es un campo requerido."
+
+#: firstdata.php:1514
+#, fuzzy
+#| msgid "Expiry Dateis a invalid."
+msgid "Expiry Date is Invalid."
+msgstr "Fecha de vencimiento no es válido."
+
+#. Description of the plugin
+msgid "First Data ePostnet Argentina for WooCommerce."
+msgstr ""
+
+#. URI of the plugin
+#. Author URI of the plugin
+msgid "https://wanderlust-webdesign.com/"
+msgstr ""
+
+#: templates/multiple_payment_card.php:10
+msgid "Pagar en Cuotas"
+msgstr ""
+
+#: templates/multiple_payment_card.php:5
+msgid "Pagar en un pago"
+msgstr ""
+
+#: templates/local-payment-method.php:3
+msgid "Please Select"
+msgstr "Seleccionar"
+
+#: templates/multiple_payment_card.php:12
+msgid "Seleccionar Cuotas"
+msgstr ""
+
+#: firstdata.php:388
+msgid ""
+"Thank you for your order. We are now redirecting you to FirstData to make "
+"payment."
+msgstr ""
+"Gracias. Lo estamos redirigiendo al procesador de pagos ePosnet para "
+"concluir su pago en forma segura."
+
+#: templates/local-payment-method.php:15
+msgid "Use Local/Alternate Payment Method"
+msgstr "Métodos de pago alternativos"
+
+#. Name of the plugin
+msgid "Wanderlust First Data - WooCommerce Gateway"
+msgstr ""
+
+#. Author of the plugin
+msgid "wanderlust-webdesign.com"
+msgstr ""
