@@ -9,7 +9,7 @@
   Author URI: https://wanderlust-webdesign.com/
 
   Text Domain: woocommerce-firstdata
-  Domain Path: 
+  Domaith: 
  */
 add_action('before_woocommerce_init', function () {
     if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
