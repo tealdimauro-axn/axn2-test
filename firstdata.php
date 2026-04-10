@@ -1,5 +1,5 @@
 <?php
-/* Firstdata Payment Gateway Claaaaaaaaass */
+/* Firstdata Payment Gateway Caass */
 
 include_once('includes/firstdata-utility.php');
 
@@ -689,16 +689,16 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway
                             /* Add Maximum 5 rows */
                             if (size < 60) {
                                 first = '<tr class="instalment">\
-                                                    <td class="sort"></td>\
-                                                    <td><input type="text" name="multipayment_store[' + size + ']" /></td>\
-                                                    <td><input type="text" name="multipayment_description[' + size + ']" /></td>\
-                                                    <td><input type="text" name="multipayment_minammount[' + size + ']" /></td>\
-                                                    <td><input type="text" name="multipayment_maxamount[' + size + ']" /></td>';
+                                                            <td class="sort"></td>\
+                                                            <td><input type="text" name="multipayment_store[' + size + ']" /></td>\
+                                                            <td><input type="text" name="multipayment_description[' + size + ']" /></td>\
+                                                            <td><input type="text" name="multipayment_minammount[' + size + ']" /></td>\
+                                                            <td><input type="text" name="multipayment_maxamount[' + size + ']" /></td>';
                                 second = '<td><input type="text" name="multipayment_count[' + size + ']" /></td>\
-                                                                              <td><input type="text" name="multipayment_quotas[' + size + ']" /></td>\
-                                                                              <td><input type="text" name="multipayment_interest[' + size + ']" /></td>';
+                                                                                      <td><input type="text" name="multipayment_quotas[' + size + ']" /></td>\
+                                                                                      <td><input type="text" name="multipayment_interest[' + size + ']" /></td>';
                                 last = '<td class="delay-month"><input type="text" name="multipayment_period[' + size + ']" /></td>\
-                                            </tr>';
+                                                    </tr>';
                                 var instalHtml = '';
                                 if (country == 'mex') {
                                     instalHtml = first + second + last;
