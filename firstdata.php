@@ -1,9 +1,10 @@
 <?php
-/* Firstdata Payment Gateway Class */
+/* Firstdata Payment Gateway Claaaaaaaaass */
 
-include_once( 'includes/firstdata-utility.php' );
+include_once('includes/firstdata-utility.php');
 
-class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
+class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway
+{
 
     /** @var bool Whether or not logging is enabled */
     public static $log_enabled = false;
@@ -12,7 +13,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     public static $log = false;
 
     // Setup our Gateway's id, description and other values
-    function __construct() {
+    function __construct()
+    {
 
         global $woocommerce;
 
@@ -40,9 +42,9 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         add_action('woocommerce_api_fdfailed', array($this, 'checkTransactionStatus'));
         add_action('woocommerce_api_fdnotify', array($this, 'checkNotifyResponse'));
 
-        add_action( 'woocommerce_api_firstdata', array( $this, 'webhook' ) );
-          
-        add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+        add_action('woocommerce_api_firstdata', array($this, 'webhook'));
+
+        add_action('woocommerce_thankyou_' . $this->id, array($this, 'thankyou_page'));
 
 
         add_action('woocommerce_after_checkout_validation', array($this, 'checkout_card_validation'));
@@ -82,21 +84,23 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         add_action('woocommerce_receipt_' . $this->id, array($this, 'receipt_page'));
 
         // Instalment fields shown on the thanks page and in emails
-        $this->instalment_details = get_option('woocommerce_multiple_paymet_gateway', array(
+        $this->instalment_details = get_option(
+            'woocommerce_multiple_paymet_gateway',
             array(
-                'multipayment_id' => $this->get_option('multipayment_id'),
-                'multipayment_description' => $this->get_option('multipayment_description'),
-                'multipayment_store' => $this->get_option('multipayment_store'),
-                'multipayment_minammount' => $this->get_option('multipayment_minammount'),
-                'multipayment_maxamount' => $this->get_option('multipayment_maxamount'),
-                'multipayment_count' => $this->get_option('multipayment_count'),
-                'multipayment_period' => $this->get_option('multipayment_period'),
-                'multipayment_quotas' => $this->get_option('multipayment_quotas'),
-                'multipayment_interest' => $this->get_option('multipayment_interest')
-            ),
-                )
+                array(
+                    'multipayment_id' => $this->get_option('multipayment_id'),
+                    'multipayment_description' => $this->get_option('multipayment_description'),
+                    'multipayment_store' => $this->get_option('multipayment_store'),
+                    'multipayment_minammount' => $this->get_option('multipayment_minammount'),
+                    'multipayment_maxamount' => $this->get_option('multipayment_maxamount'),
+                    'multipayment_count' => $this->get_option('multipayment_count'),
+                    'multipayment_period' => $this->get_option('multipayment_period'),
+                    'multipayment_quotas' => $this->get_option('multipayment_quotas'),
+                    'multipayment_interest' => $this->get_option('multipayment_interest')
+                ),
+            )
         );
-        
+
 
         // Save settings
         if (is_admin()) {
@@ -115,14 +119,16 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Build the administration fields for First Data IPG Gateway
      */
-    public function init_form_fields() {
-        $this->form_fields = include( 'includes/firstdata-settings.php' );
+    public function init_form_fields()
+    {
+        $this->form_fields = include('includes/firstdata-settings.php');
     }
 
     /**
      * Installment for user checkout
      */
-    public function showInstallment() {
+    public function showInstallment()
+    {
         global $woocommerce;
         $totalcartamount = $woocommerce->cart->total;
         $installment_payment = $this->get_saved_cards();
@@ -135,7 +141,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Check the installment is applicable or not
      */
-    private function check_for_applicable_installment($cart_total, $installment_payment) {
+    private function check_for_applicable_installment($cart_total, $installment_payment)
+    {
         $final_installment_payment = array();
         foreach ($installment_payment as $key => $installment) {
             if (($installment['multipayment_minammount'] <= $cart_total) && ($installment['multipayment_maxamount'] >= $cart_total)) {
@@ -151,7 +158,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @access private
      * @return array
      */
-    private function get_saved_cards() {
+    private function get_saved_cards()
+    {
         $multiple_payment = get_option('woocommerce_multiple_paymet_gateway');
         return $multiple_payment;
     }
@@ -161,20 +169,21 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      *
      * @since 1.0.0
      */
-    function generate_ipg_in_form($order_id) {
+    function generate_ipg_in_form($order_id)
+    {
         global $woocommerce;
         $order = wc_get_order($order_id);
         $notifyUrl = get_site_url(null, '/wc-api/fdnotify');
         $successUrl = get_site_url(null, '/wc-api/fdsuccess');
         //$failedUrl = get_site_url(null, '/wc-api/fdfailed');
-		    $failedUrl = "https://axnsport.com/falla-en-el-pago/";
-		/*$timezone = "GMT-3";*/
-		$timezone = "America/Buenos_Aires";
-		date_default_timezone_set("America/Argentina/Buenos_Aires");
+        $failedUrl = "https://axnsport.com/falla-en-el-pago/";
+        /*$timezone = "GMT-3";*/
+        $timezone = "America/Buenos_Aires";
+        date_default_timezone_set("America/Argentina/Buenos_Aires");
 
         $txndatetime = date('Y:m:d-H:i:s');
-		
-	
+
+
 
         $country = $this->get_option('country');
         $reseller = $this->get_option('reseller');
@@ -184,7 +193,7 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         /*if (defined('WPLANG')) {
             $language = WPLANG;
         }*/
-		$language=get_locale();
+        $language = get_locale();
         $customNotifyUrl = '';
         $customSuccessUrl = '';
         $customFailedUrl = '';
@@ -203,10 +212,10 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
 
         $notifyUrl = $customNotifyUrl != '' ? $customNotifyUrl : $notifyUrl;
         $successUrl = $order->get_checkout_order_received_url();
- 		 $failedUrl = $order->get_cancel_order_url();
-		
- 
-          
+        $failedUrl = $order->get_cancel_order_url();
+
+
+
 
         $ipg_args = array(
             'timezone' => $timezone,
@@ -223,8 +232,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             'txntype' => $this->authorisation == 'yes' ? 'sale' : 'preauth',
             'checkoutoption' => $this->checkout,
             'dynamicMerchantName' => $this->get_option('dynamic_merchant_name'),
-            'authenticateTransaction' =>  'true',
-             'threeDSRequestorChallengeIndicator' => 1,
+            'authenticateTransaction' => 'true',
+            'threeDSRequestorChallengeIndicator' => 1,
             'dccSkipOffer' => 'false',
             'oid' => $order_id,
         );
@@ -308,7 +317,7 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         $enable_installment = wc_clean(WC()->session->get($this->id . '-enable_installment_payment'));
         WC()->session->__unset($this->id . '-enable_installment_payment');
 
-       
+
 
         if ($enable_installment == "multiplepayment") {
             $installment_id = wc_clean(WC()->session->get($this->id . '-installment_id'));
@@ -317,62 +326,62 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             foreach ($installment_details as $key => $installment) {
                 if ($installment['multipayment_id'] == $installment_id) {
 
-                    $new_total = $order->order_total * $installment['multipayment_interest'] ;
+                    $new_total = $order->order_total * $installment['multipayment_interest'];
                     $new_total = number_format($new_total, 2, '.', '');
-					
-					 $recargo =   $new_total - $order->order_total ;
-					
-				 
+
+                    $recargo = $new_total - $order->order_total;
+
+
                     $ipg_args['hash'] = $this->createRequestHash($txndatetime, $new_total, $currency);
 
 
                     $ipg_args['numberOfInstallments'] = $installment['multipayment_count'];
                     $ipg_args['chargetotal'] = $new_total;
 
-                    $order->set_total( $new_total );
-                    update_post_meta($order_id,'_order_total', $new_total);
-                  
-                    
-				  $fee_data   = array(
-						'name'       => __('Recargo Tarjeta'),
-						'amount'     => wc_format_decimal($recargo),
-						'tax_status' => 'none',
-						'tax_class'  => ''
-					);
+                    $order->set_total($new_total);
+                    update_post_meta($order_id, '_order_total', $new_total);
 
- 
-    
-        $item = new WC_Order_Item_Fee(); // Get an empty instance object
 
-        $item->set_name( $fee_data['name'] );
-        $item->set_amount( $fee_data['amount'] );
-        $item->set_tax_class($fee_data['tax_class']);
-        $item->set_tax_status($fee_data['tax_status']);
-        $item->set_total($fee_data['amount']);
+                    $fee_data = array(
+                        'name' => __('Recargo Tarjeta'),
+                        'amount' => wc_format_decimal($recargo),
+                        'tax_status' => 'none',
+                        'tax_class' => ''
+                    );
 
-        $order->add_item( $item );
-        $item->save(); // (optional) to be sure
-        $mostrar_cuotas =  $installment['multipayment_quotas'];
 
-        $intereses =           $installment['multipayment_interest'];
-        $porcentajeint = ($installment['multipayment_interest'] -1 )*100;
-        $total_intereses = $new_total;
-        $valorcuota =  wc_format_decimal($new_total  / $mostrar_cuotas);
-                  
-                  
-        if($porcentajeint < 1){
-          $texto_mostrar='
-							<p>Descuento por pago en cuotas <strong>'.$porcentajeint.'%</strong> <p>Total a pagar con descuento <strong>$'.round($total_intereses,2).'</strong> <p>Pagar&aacute;s <span style="color: #000000;"><strong>'.$mostrar_cuotas.'</strong></span> cuotas de <span style="color: #000000;"><strong>$'.$valorcuota.'</strong></span> cada una.</p>
+
+                    $item = new WC_Order_Item_Fee(); // Get an empty instance object
+
+                    $item->set_name($fee_data['name']);
+                    $item->set_amount($fee_data['amount']);
+                    $item->set_tax_class($fee_data['tax_class']);
+                    $item->set_tax_status($fee_data['tax_status']);
+                    $item->set_total($fee_data['amount']);
+
+                    $order->add_item($item);
+                    $item->save(); // (optional) to be sure
+                    $mostrar_cuotas = $installment['multipayment_quotas'];
+
+                    $intereses = $installment['multipayment_interest'];
+                    $porcentajeint = ($installment['multipayment_interest'] - 1) * 100;
+                    $total_intereses = $new_total;
+                    $valorcuota = wc_format_decimal($new_total / $mostrar_cuotas);
+
+
+                    if ($porcentajeint < 1) {
+                        $texto_mostrar = '
+							<p>Descuento por pago en cuotas <strong>' . $porcentajeint . '%</strong> <p>Total a pagar con descuento <strong>$' . round($total_intereses, 2) . '</strong> <p>Pagar&aacute;s <span style="color: #000000;"><strong>' . $mostrar_cuotas . '</strong></span> cuotas de <span style="color: #000000;"><strong>$' . $valorcuota . '</strong></span> cada una.</p>
 							<p>&nbsp;</p><p>&nbsp;</p>';
-        } else {
-           $texto_mostrar='    <p>Total a pagar con intereses <strong>$'.round($total_intereses,2).'</strong>
-        <p>Pagar&aacute;s <span style="color: #000000;"><strong>'.$mostrar_cuotas.'</strong></span> 
-        cuotas de <span style="color: #000000;"><strong>$'.round($valorcuota,2).'</strong></span> cada una.</p>
+                    } else {
+                        $texto_mostrar = '    <p>Total a pagar con intereses <strong>$' . round($total_intereses, 2) . '</strong>
+        <p>Pagar&aacute;s <span style="color: #000000;"><strong>' . $mostrar_cuotas . '</strong></span> 
+        cuotas de <span style="color: #000000;"><strong>$' . round($valorcuota, 2) . '</strong></span> cada una.</p>
 							<p>&nbsp;</p><p>&nbsp;</p>';
-        }
-        
-       
-    
+                    }
+
+
+
 
 
                     /**
@@ -393,7 +402,7 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             }
         }
 
- 
+
 
         /*
          * Add local/alternative payment method
@@ -415,19 +424,19 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             $ipg_args['semail'] = $order->get_billing_email();
         }
 
-		   
-			  
-		
+
+
+
         $ipgform = '';
-		
-       
+
+
         foreach ($ipg_args as $key => $value) {
             if ($value) {
                 $ipgform .= '<input type="hidden" name="' . $key . '" value="' . $value . '" />' . "\n";
             }
         }
 
-        return ''.$texto_mostrar.'<form action="' . $url . '" method="POST" name="payform" id="payform">
+        return '' . $texto_mostrar . '<form action="' . $url . '" method="POST" name="payform" id="payform">
                 ' . $ipgform . '
                 <input type="submit" class="button" id="submit_ipg_payment_form" value="' . __('FINALIZAR PAGO', $this->id) . '" /> <a class="button cancel" href="' . $order->get_cancel_order_url() . '">' . __('Cancelar pedido &amp; vaciar el carrito', $this->id) . '</a>
                 
@@ -439,13 +448,14 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @param type $order_id
      * @return type 
      */
-    public function process_payment($order_id) {
-      
-      
-      if(empty($this->get_post_var('_multiplepayment'))){
-        
-        return array('result' => 'error'   );
-      }
+    public function process_payment($order_id)
+    {
+
+
+        if (empty($this->get_post_var('_multiplepayment'))) {
+
+            return array('result' => 'error');
+        }
         $this->log('Enter in to Process Payment for order ID: ' . $order_id, 'info');
         $order = new WC_Order($order_id);
         $this->log('Post Data ' . print_r($_POST, TRUE), 'info'); //exit;
@@ -484,7 +494,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * Display text and a button to direct the user to the payment screen.
      * @since 1.0.0
      */
-    function receipt_page($order) {
+    function receipt_page($order)
+    {
         echo '<p>' . __('Gracias por tu pedido, haz click en el botón a continuación para finalizar el pago en FirstData.', $this->id) . '</p>';
 
         echo $this->generate_ipg_in_form($order);
@@ -494,7 +505,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * Builds our payment fields area - including tokenization fields for logged
      * in users, and the actual payment fields.
      */
-    public function payment_fields() {
+    public function payment_fields()
+    {
         if ($this->description) {
             echo apply_filters('wc_' . $this->id . '_description', wpautop(wp_kses_post($this->description)));
         }
@@ -517,7 +529,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * genarate interest option to be added in admin for Mexico reseller
      */
-    public function generate_interest_instalment_html() {
+    public function generate_interest_instalment_html()
+    {
         ob_start();
         ?>
         <tr valign="top" id="mexico_installment_interest_tr">
@@ -529,7 +542,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Local Payment Checkout page ui handling 
      */
-    public function localPaymentMethod() {
+    public function localPaymentMethod()
+    {
         $local_payment = $this->paymentOptionsValue();
         $local_method = $this->local_payment_method_options;
         $local_payment_method_options = array();
@@ -551,7 +565,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Local Payment options supported in IPG configuration
      */
-    public function paymentOptionsValue() {
+    public function paymentOptionsValue()
+    {
         return array(
             'M' => array('name' => 'MasterCard', 'card_support' => true, 'shipping_support' => true),
             'V' => array('name' => 'Visa (Credit/Debit/Electron/Delta)', 'card_support' => true, 'shipping_support' => true),
@@ -574,14 +589,15 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             'sofort' => array('name' => 'SOFORT Banking (Überweisung)', 'card_support' => false, 'shipping_support' => true),
             'SO' => array('name' => 'Sorocred', 'card_support' => true, 'shipping_support' => true),
             'BCMC' => array('name' => 'Bancontact', 'card_support' => true, 'shipping_support' => true),
-			'EL' => array('name' => 'ELO', 'card_support' => true,'shipping_support' => true),
-            'hipercard' => array('name' => 'HIPER/HIPERCARD', 'card_support' => true,'shipping_support' => true),
-			'mexicoLocal' => array('name' => 'MEXICOLOCAL', 'card_support' => true,'shipping_support' => false),
-			
+            'EL' => array('name' => 'ELO', 'card_support' => true, 'shipping_support' => true),
+            'hipercard' => array('name' => 'HIPER/HIPERCARD', 'card_support' => true, 'shipping_support' => true),
+            'mexicoLocal' => array('name' => 'MEXICOLOCAL', 'card_support' => true, 'shipping_support' => false),
+
         );
     }
 
-    public function checkPaymentOptions($value) {
+    public function checkPaymentOptions($value)
+    {
         $options = array();
         if (array_key_exists($value, $this->paymentOptionsValue())) {
             $options = $this->paymentOptionsValue();
@@ -590,7 +606,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         return $options;
     }
 
-    public function validpaymentOptions($value) {
+    public function validpaymentOptions($value)
+    {
         return array_key_exists($value, $this->paymentOptionsValue()) ? true : false;
     }
 
@@ -599,7 +616,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      *
      * @return string
      */
-    public function generate_instalment_details_html() {
+    public function generate_instalment_details_html()
+    {
         ob_start();
         ?>
         <tr valign="top" id="multiple_payment_tr">
@@ -643,75 +661,79 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="8"><a href="#" class="add button" id='add_button'><?php _e('+ Add Instalment', 'woocommerce'); ?></a> 
-                                <a href="#" class="remove_rows button" id="remove_button"><?php _e('Remove instalment(s)', 'woocommerce'); ?></a></th>
+                            <th colspan="8"><a href="#" class="add button"
+                                    id='add_button'><?php _e('+ Add Instalment', 'woocommerce'); ?></a>
+                                <a href="#" class="remove_rows button"
+                                    id="remove_button"><?php _e('Remove instalment(s)', 'woocommerce'); ?></a>
+                            </th>
                         </tr>
                         <tr>
                             <td colspan='5' style='font-style: italic;font-size:80%;'>
-                                Click on the "Add Instalment" button to configure one or more payment options.<br/>
-                                <b>Store ID :</b> Add Store ID.<br/>
-                                <b>Label :</b> The option label to display on the front end.<br/>
-                                <b>Min Amount :</b> Minimum amount to enable the payment option.<br/>
-                                <b>Max amount :</b> Maximum amount to enable the payment option.<br/>
-                                <b>Count :</b> Total number of payments.<br/>
-                                <span class="delay-month"><b>Period :</b> Delay (in days) between payment<br/></span>
-                                <b>DO not forget to click on "Save" button to save your modifications.</b></td>
+                                Click on the "Add Instalment" button to configure one or more payment options.<br />
+                                <b>Store ID :</b> Add Store ID.<br />
+                                <b>Label :</b> The option label to display on the front end.<br />
+                                <b>Min Amount :</b> Minimum amount to enable the payment option.<br />
+                                <b>Max amount :</b> Maximum amount to enable the payment option.<br />
+                                <b>Count :</b> Total number of payments.<br />
+                                <span class="delay-month"><b>Period :</b> Delay (in days) between payment<br /></span>
+                                <b>DO not forget to click on "Save" button to save your modifications.</b>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
                 <script type="text/javascript">
-                    jQuery(function() {
-                        jQuery('#fd_instalment').on( 'click', 'a.add', function(){ 
+                    jQuery(function () {
+                        jQuery('#fd_instalment').on('click', 'a.add', function () {
                             var country = jQuery('select#woocommerce_wanderlust_firstdata_gateway_country').find('option:selected').val();
                             var size = jQuery('#fd_instalment').find('tbody .instalment').length;
                             /* Add Maximum 5 rows */
-                            if(size < 60){
+                            if (size < 60) {
                                 first = '<tr class="instalment">\
-                                            <td class="sort"></td>\
-                                            <td><input type="text" name="multipayment_store[' + size + ']" /></td>\
-                                            <td><input type="text" name="multipayment_description[' + size + ']" /></td>\
-                                            <td><input type="text" name="multipayment_minammount[' + size + ']" /></td>\
-                                            <td><input type="text" name="multipayment_maxamount[' + size + ']" /></td>';
-                                                            second = '<td><input type="text" name="multipayment_count[' + size + ']" /></td>\
-                                                                      <td><input type="text" name="multipayment_quotas[' + size + ']" /></td>\
-                                                                      <td><input type="text" name="multipayment_interest[' + size + ']" /></td>';
-                                                            last = '<td class="delay-month"><input type="text" name="multipayment_period[' + size + ']" /></td>\
-                                    </tr>';
-                                                            var instalHtml = '';
-                                                            if(country == 'mex'){
-                                                                instalHtml =  first + second + last;
-                                                            } else {
-                                                                instalHtml =  first + second + last;
-                                                            }
-                                                                                
-                                                            jQuery(instalHtml).appendTo('#fd_instalment table tbody');
-                                                            if(size == 4){
-                                                                jQuery('#add_button').hide();
-                                                            }
-                                                        } else {
-                                                            jQuery('#add_button').hide();
-                                                        }
+                                                    <td class="sort"></td>\
+                                                    <td><input type="text" name="multipayment_store[' + size + ']" /></td>\
+                                                    <td><input type="text" name="multipayment_description[' + size + ']" /></td>\
+                                                    <td><input type="text" name="multipayment_minammount[' + size + ']" /></td>\
+                                                    <td><input type="text" name="multipayment_maxamount[' + size + ']" /></td>';
+                                second = '<td><input type="text" name="multipayment_count[' + size + ']" /></td>\
+                                                                              <td><input type="text" name="multipayment_quotas[' + size + ']" /></td>\
+                                                                              <td><input type="text" name="multipayment_interest[' + size + ']" /></td>';
+                                last = '<td class="delay-month"><input type="text" name="multipayment_period[' + size + ']" /></td>\
+                                            </tr>';
+                                var instalHtml = '';
+                                if (country == 'mex') {
+                                    instalHtml = first + second + last;
+                                } else {
+                                    instalHtml = first + second + last;
+                                }
 
-                                                        return false;
-                                                    });
+                                jQuery(instalHtml).appendTo('#fd_instalment table tbody');
+                                if (size == 4) {
+                                    jQuery('#add_button').hide();
+                                }
+                            } else {
+                                jQuery('#add_button').hide();
+                            }
 
-                                                    jQuery('#remove_button').on( 'click', function(){
-                                                        var size = jQuery('#fd_instalment').find('tbody .instalment').length;
-                                                        if(size < 5){
-                                                            jQuery('#add_button').show();															
-                                                        }
-                                                    });
+                            return false;
+                        });
 
-                                                    if (jQuery('#woocommerce_wanderlust_firstdata_gateway_rule_activation').is(":checked")) {
-                                                        jQuery("#multiple_payment_tr").fadeIn( "slow" );
-                                                    } else {
-                                                        jQuery("#multiple_payment_tr").fadeOut( "slow" );
-                                                    }
+                        jQuery('#remove_button').on('click', function () {
+                            var size = jQuery('#fd_instalment').find('tbody .instalment').length;
+                            if (size < 5) {
+                                jQuery('#add_button').show();
+                            }
+                        });
 
-                                                    if(jQuery('.woocommerce-save-button')){
-                                                    }
+                        if (jQuery('#woocommerce_wanderlust_firstdata_gateway_rule_activation').is(":checked")) {
+                            jQuery("#multiple_payment_tr").fadeIn("slow");
+                        } else {
+                            jQuery("#multiple_payment_tr").fadeOut("slow");
+                        }
 
-                                                });
+                        if (jQuery('.woocommerce-save-button')) {
+                        }
+
+                    });
                 </script>
             </td>
         </tr>
@@ -722,14 +744,17 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Save account details table.
      */
-    public function save_instalment_details() {
+    public function save_instalment_details()
+    {
 
         $instalmentsDetails = array();
 
 
-        if (isset($_POST['woocommerce_wanderlust_firstdata_gateway_rule_activation']) &&
-                ( $_POST['woocommerce_wanderlust_firstdata_gateway_rule_activation'] == 1) &&
-                isset($_POST['multipayment_description'])) {
+        if (
+            isset($_POST['woocommerce_wanderlust_firstdata_gateway_rule_activation']) &&
+            ($_POST['woocommerce_wanderlust_firstdata_gateway_rule_activation'] == 1) &&
+            isset($_POST['multipayment_description'])
+        ) {
 
             $multipayment_description = array_map('wc_clean', $_POST['multipayment_description']);
             $multipayment_store = array_map('wc_clean', $_POST['multipayment_store']);
@@ -769,7 +794,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * Outputs fields for entering credit card information.
      * @since 2.6.0
      */
-    public function form() {
+    public function form()
+    {
         wp_enqueue_script('wc-credit-card-form');
 
         $fields = array();
@@ -809,369 +835,382 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         ?>
 
         <fieldset id="wc-<?php echo esc_attr($this->id); ?>-cc-form" class='wc-credit-card-form wc-payment-form'>
-        <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
-        <?php
-        foreach ($fields as $field) {
-            echo $field;
-        }
-        ?>
-        <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
+            <?php do_action('woocommerce_credit_card_form_start', $this->id); ?>
+            <?php
+            foreach ($fields as $field) {
+                echo $field;
+            }
+            ?>
+            <?php do_action('woocommerce_credit_card_form_end', $this->id); ?>
             <div class="clear"></div>
         </fieldset>
-            <?php
-        }
+        <?php
+    }
 
-        /**
-         * Enqueues our tokenization script to handle some of the new form options.
-         * @since 2.6.0
-         */
-        public function tokenization_script() {
-            wp_enqueue_script(
-                    'woocommerce-tokenization-form', plugins_url('/assets/js/frontend/tokenization-form' . ( defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min' ) . '.js', WC_PLUGIN_FILE), array('jquery'), WC()->version
-            );
-        }
+    /**
+     * Enqueues our tokenization script to handle some of the new form options.
+     * @since 2.6.0
+     */
+    public function tokenization_script()
+    {
+        wp_enqueue_script(
+            'woocommerce-tokenization-form',
+            plugins_url('/assets/js/frontend/tokenization-form' . (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min') . '.js', WC_PLUGIN_FILE),
+            array('jquery'),
+            WC()->version
+        );
+    }
 
-        /**
-         * Check the validity of data received in $_POST and the status of transaction
-         * @since 1.0.0
-         */
-        public function checkTransactionStatus() {
-            $postData = array();
+    /**
+     * Check the validity of data received in $_POST and the status of transaction
+     * @since 1.0.0
+     */
+    public function checkTransactionStatus()
+    {
+        $postData = array();
 
-            $getPost = wp_unslash($_POST); // WPCS: CSRF ok, input var ok.
+        $getPost = wp_unslash($_POST); // WPCS: CSRF ok, input var ok.
 
-            if (!empty($getPost)) {
-                foreach ($getPost as $key => $value) {
-                    $postData[$key] = htmlentities($value, ENT_QUOTES);
-                }
-            } else {
-                $this->log('No transaction data was passed', 'Error');
-                die('No transaction data was passed!');
+        if (!empty($getPost)) {
+            foreach ($getPost as $key => $value) {
+                $postData[$key] = htmlentities($value, ENT_QUOTES);
             }
-			$this->log('Gateway Returns : Response  ' . print_r($postData, TRUE), 'info');
-            $this->log('Payment Gateway Returns to Site for Order Id: ' . $postData['oid'], 'info');
-		    
-            $approvalcode = substr($postData['approval_code'], 0, 1);
-			$this->log('approval: ' . $postData['approval_code'], 'info');
-            if ($this->validateGatewayHash($postData, false) === false) {
-                $postData['fail_reason'] = 'Response Hash not matched';
+        } else {
+            $this->log('No transaction data was passed', 'Error');
+            die('No transaction data was passed!');
+        }
+        $this->log('Gateway Returns : Response  ' . print_r($postData, TRUE), 'info');
+        $this->log('Payment Gateway Returns to Site for Order Id: ' . $postData['oid'], 'info');
+
+        $approvalcode = substr($postData['approval_code'], 0, 1);
+        $this->log('approval: ' . $postData['approval_code'], 'info');
+        if ($this->validateGatewayHash($postData, false) === false) {
+            $postData['fail_reason'] = 'Response Hash not matched';
+            $this->payment_failure($postData);
+        } else {
+            if ($approvalcode == 'Y') {
+                $this->payment_success($postData);
+            }
+
+            if ($approvalcode == 'N') {
                 $this->payment_failure($postData);
-            } else {
-                if ($approvalcode == 'Y') {
-                    $this->payment_success($postData);
-                }
-
-                if ($approvalcode == 'N') {
-                    $this->payment_failure($postData);
-                }
             }
         }
+    }
 
-        /**
-         * @since 1.0.0
-         */
-        public function payment_success($responseData) {
+    /**
+     * @since 1.0.0
+     */
+    public function payment_success($responseData)
+    {
 
-            global $woocommerce;
+        global $woocommerce;
 
-            $order = wc_get_order($responseData['oid']);
+        $order = wc_get_order($responseData['oid']);
 
-            if (!$responseData || !$order || !$responseData['oid']) {
-                $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
-                die('No transaction data was passed for success method!');
+        if (!$responseData || !$order || !$responseData['oid']) {
+            $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
+            die('No transaction data was passed for success method!');
+        }
+
+        $responseSuccessURL = $this->get_return_url($order);
+        $this->log('Gateway Returns : Success for order Id: ' . $responseData['oid'] . ' IPG Ref No: ' . $responseData['ipgTransactionId'], 'info');
+
+        // Maybe save card
+        if (is_user_logged_in() && 'yes' == $this->get_option('tokenisation') && $responseData['hosteddataid'] != '') {
+            $tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
+            $stored_tokens = array();
+            foreach ($tokens as $token) {
+                $stored_tokens[] = $token->get_last4();
             }
+            if (!in_array(substr($responseData['cardnumber'], -4), $stored_tokens)) {
+                $this->save_card($responseData);
+            }
+        }
+        /*
+         * Added for ICICI Merchant to store the Installment
+         */
+        if ('icici' == $this->get_option('reseller') && $responseData['number_of_installments'] != '') {
+            $order->add_order_note('Transaction Successful: <br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal'] . '<br/>IPG Ref No: ' . $responseData['ipgTransactionId'] . '<br/>Number of installment : ' . $responseData['number_of_installments'] . '<br/>Installments amount per month : ' . $responseData['installments_amount_per_month']);
+        } else {
+            $order->add_order_note('Transaction Successful: <br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal'] . '<br/>IPG Ref No: ' . $responseData['ipgTransactionId']);
+        }
 
-            $responseSuccessURL = $this->get_return_url($order);
-            $this->log('Gateway Returns : Success for order Id: ' . $responseData['oid'] . ' IPG Ref No: ' . $responseData['ipgTransactionId'], 'info');
+        $woocommerce->cart->empty_cart();
 
-            // Maybe save card
-            if (is_user_logged_in() && 'yes' == $this->get_option('tokenisation') && $responseData['hosteddataid'] != '') {
+        /*
+         * Updated transaction detail in order to process Refund later
+         */
+        $ipgTransactionId = $this->get_post_var('ipgTransactionId');
+        update_post_meta($order->get_id(), '_order_hash_id', $this->get_post_var('oid'));
+        update_post_meta($order->get_id(), '_txn_type', $this->get_post_var('txntype'));
+        $order->payment_complete($ipgTransactionId);
+
+        wp_redirect($responseSuccessURL);
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function payment_failure($responseData)
+    {
+
+        global $woocommerce;
+
+        $order = new WC_Order($responseData['oid']);
+
+        $this->log('Gateway Returns : Failure for order Id: ' . $responseData['oid'] . 'Transaction Declined: ' . $responseData['fail_reason'] . ' IPG Ref No: ' . $responseData['ipgTransactionId'], 'info');
+
+        $failURL = $this->get_return_url($order);
+
+        $order->update_status('failed');
+        $order->add_order_note('Transaction Declined: ' . $responseData['fail_reason'] . '<br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal']);
+        $woocommerce->cart->empty_cart();
+
+        wp_redirect($failURL);
+    }
+
+    public function checkNotifyResponse()
+    {
+        global $woocommerce;
+
+        $postData = array();
+
+        $getPost = wp_unslash($_POST); // WPCS: CSRF ok, input var ok.
+        if (!empty($getPost)) {
+            foreach ($getPost as $key => $value) {
+                $postData[$key] = htmlentities($value, ENT_QUOTES);
+            }
+        } else {
+            $this->log('Payment Gateway Notify URL : No transaction data ', 'info');
+            die('No transaction data was passed!');
+        }
+        if (!$postData['oid']) {
+            $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
+            die('Invalid Data is passed!');
+        }
+
+
+        $txnid = $postData['oid'];
+        $this->log('Payment Gateway Return: Notified for Order ID:' . $txnid, 'info');
+        $order = new WC_Order($txnid);
+
+        if ($this->validateGatewayHash($postData, true) === false) {
+            $this->log('Invalid Response Hash received from gateway on Notify URL', 'Error');
+            die('Invalid Response Hash received for Order ID: ' . $txnid);
+        }
+
+        $approvalcode = substr($postData['approval_code'], 0, 1);
+
+        if ($approvalcode == 'Y') {
+            if (is_user_logged_in() && 'yes' == $this->get_option('tokenisation') && $postData['hosteddataid'] != '') {
                 $tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
                 $stored_tokens = array();
                 foreach ($tokens as $token) {
                     $stored_tokens[] = $token->get_last4();
                 }
-                if (!in_array(substr($responseData['cardnumber'], -4), $stored_tokens)) {
-                    $this->save_card($responseData);
+                if (!in_array(substr($postData['cardnumber'], -4), $stored_tokens)) {
+                    $this->save_card($postData);
                 }
             }
-            /*
-             * Added for ICICI Merchant to store the Installment
-             */
-            if ('icici' == $this->get_option('reseller') && $responseData['number_of_installments'] != '') {
-                $order->add_order_note('Transaction Successful: <br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal'] . '<br/>IPG Ref No: ' . $responseData['ipgTransactionId'] . '<br/>Number of installment : ' . $responseData['number_of_installments'] . '<br/>Installments amount per month : ' . $responseData['installments_amount_per_month']);
-            } else {
-                $order->add_order_note('Transaction Successful: <br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal'] . '<br/>IPG Ref No: ' . $responseData['ipgTransactionId']);
-            }
-
-            $woocommerce->cart->empty_cart();
-
-            /*
-             * Updated transaction detail in order to process Refund later
-             */
-            $ipgTransactionId = $this->get_post_var('ipgTransactionId');
-            update_post_meta($order->get_id(), '_order_hash_id', $this->get_post_var('oid'));
-            update_post_meta($order->get_id(), '_txn_type', $this->get_post_var('txntype'));
-            $order->payment_complete($ipgTransactionId);
-
-            wp_redirect($responseSuccessURL);
+            $this->log('Gateway Returns to Notify URL : Payment Success for order Id: ' . $postData['order_id'], 'info');
+            update_post_meta($order->get_id(), '_order_hash_id', $postData['oid']);
+            update_post_meta($order->get_id(), '_txn_type', $postData['txntype']);
+            $order->payment_complete($postData['ipgTransactionId']);
         }
 
-        /**
-         * @since 1.0.0
-         */
-        public function payment_failure($responseData) {
-
-            global $woocommerce;
-
-            $order = new WC_Order($responseData['oid']);
-
-            $this->log('Gateway Returns : Failure for order Id: ' . $responseData['oid'] . 'Transaction Declined: ' . $responseData['fail_reason'] . ' IPG Ref No: ' . $responseData['ipgTransactionId'], 'info');
-
-            $failURL = $this->get_return_url($order);
-
+        if ($approvalcode == 'N') {
+            $this->log('Gateway Returns to Notify URL : Failure for order Id: ' . $postData['order_id'] . 'Transaction Declined: ' . $postData['fail_reason'] . ' IPG Ref No: ' . $postData['ipgTransactionId'], 'info');
+            $order->add_order_note('Transaction Declined: ' . $postData['fail_reason'] . '<br/>Txn ID: ' . $postData['oid'] . ' <br/>Amount: ' . $postData['chargetotal'] . '<br/>IPG Ref No: ' . $postData['ipgTransactionId']);
             $order->update_status('failed');
-            $order->add_order_note('Transaction Declined: ' . $responseData['fail_reason'] . '<br/>Txn ID: ' . $responseData['oid'] . ' <br/>Amount: ' . $responseData['chargetotal']);
-            $woocommerce->cart->empty_cart();
+        }
+        $woocommerce->cart->empty_cart();
+        return true;
+    }
 
-            wp_redirect($failURL);
+    private function validateGatewayHash($data, $isNotify)
+    {
+        if (!$data || !$data['oid']) {
+            $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
+            die('No transaction data was passed!');
+        }
+        $return = true;
+
+        if ($this->get_option('env') == "TEST") {
+            $storename = $this->get_option('test_store_name');
+            $sharedsecret = $this->get_option('test_trans_key');
+        } else {
+            $storename = $this->get_option('prod_store_name');
+            $sharedsecret = $this->get_option('prod_trans_key');
         }
 
-        public function checkNotifyResponse() {
-            global $woocommerce;
+        $order = new WC_Order($data['oid']);
 
-            $postData = array();
+        //$chargetotal = $order->order_total;
+        $chargetotal = $data['chargetotal'];
 
-            $getPost = wp_unslash($_POST); // WPCS: CSRF ok, input var ok.
-            if (!empty($getPost)) {
-                foreach ($getPost as $key => $value) {
-                    $postData[$key] = htmlentities($value, ENT_QUOTES);
-                }
-            } else {
-                $this->log('Payment Gateway Notify URL : No transaction data ', 'info');
-                die('No transaction data was passed!');
+        $currency = $this->get_currency_code_by_country(get_woocommerce_currency());
+
+
+        $txndatetime = $data['txndatetime'];
+        $approvalcode = $data['approval_code'];
+
+        if ($isNotify == true) {
+            $this->log('Hash Notify for Order Id: ' . $data['oid'], 'Info');
+            $hashValue = sha1(bin2hex($chargetotal . $sharedsecret . $currency . $txndatetime . $storename . $approvalcode));
+            if ($hashValue != $data['notification_hash']) {
+                $this->log('Invalid Notification Hash received from gateway Order Id: ' . $data['oid'], 'Error');
+                $return = false;
             }
-            if (!$postData['oid']) {
-                $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
-                die('Invalid Data is passed!');
+        } else {
+            $this->log('Hash Response for Order Id: ' . $data['oid'], 'Info');
+            $hashValue = sha1(bin2hex($sharedsecret . $approvalcode . $chargetotal . $currency . $txndatetime . $storename));
+            if ($hashValue != $data['response_hash']) {
+                $this->log('Invalid Response Hash received from gateway Order Id: ' . $data['oid'], 'Error');
+                $return = false;
             }
-
-
-            $txnid = $postData['oid'];
-            $this->log('Payment Gateway Return: Notified for Order ID:' . $txnid, 'info');
-            $order = new WC_Order($txnid);
-
-            if ($this->validateGatewayHash($postData, true) === false) {
-                $this->log('Invalid Response Hash received from gateway on Notify URL', 'Error');
-                die('Invalid Response Hash received for Order ID: ' . $txnid);
-            }
-
-            $approvalcode = substr($postData['approval_code'], 0, 1);
-
-            if ($approvalcode == 'Y') {
-                if (is_user_logged_in() && 'yes' == $this->get_option('tokenisation') && $postData['hosteddataid'] != '') {
-                    $tokens = WC_Payment_Tokens::get_customer_tokens(get_current_user_id(), $this->id);
-                    $stored_tokens = array();
-                    foreach ($tokens as $token) {
-                        $stored_tokens[] = $token->get_last4();
-                    }
-                    if (!in_array(substr($postData['cardnumber'], -4), $stored_tokens)) {
-                        $this->save_card($postData);
-                    }
-                }
-                $this->log('Gateway Returns to Notify URL : Payment Success for order Id: ' . $postData['order_id'], 'info');
-                update_post_meta($order->get_id(), '_order_hash_id', $postData['oid']);
-                update_post_meta($order->get_id(), '_txn_type', $postData['txntype']);
-                $order->payment_complete($postData['ipgTransactionId']);
-            }
-
-            if ($approvalcode == 'N') {
-                $this->log('Gateway Returns to Notify URL : Failure for order Id: ' . $postData['order_id'] . 'Transaction Declined: ' . $postData['fail_reason'] . ' IPG Ref No: ' . $postData['ipgTransactionId'], 'info');
-                $order->add_order_note('Transaction Declined: ' . $postData['fail_reason'] . '<br/>Txn ID: ' . $postData['oid'] . ' <br/>Amount: ' . $postData['chargetotal'] . '<br/>IPG Ref No: ' . $postData['ipgTransactionId']);
-                $order->update_status('failed');
-            }
-            $woocommerce->cart->empty_cart();
-            return true;
         }
 
-        private function validateGatewayHash($data, $isNotify) {
-            if (!$data || !$data['oid']) {
-                $this->log('Gateway Return: Invalid Data or Order Id is missing', 'Error');
-                die('No transaction data was passed!');
-            }
-            $return = true;
+        return $return;
+    }
 
-            if ($this->get_option('env') == "TEST") {
-                $storename = $this->get_option('test_store_name');
-                $sharedsecret = $this->get_option('test_trans_key');
-            } else {
-                $storename = $this->get_option('prod_store_name');
-                $sharedsecret = $this->get_option('prod_trans_key');
-            }
+    /**
+     * save_card function.
+     *
+     * @access public
+     * @param Object $response
+     * @return void
+     */
+    public function save_card($response)
+    {
+        $this->log('Token for Txn Id : ' . $response['oid'] . ' is created', 'info');
+        $payment_token_from_gateway = $response['hosteddataid'];
+        // Build the token
+        $token = new WC_Payment_Token_CC();
+        $token->set_token($payment_token_from_gateway); // Token comes from payment processor
+        $token->set_gateway_id($this->id);
+        $token->set_last4(substr($response['cardnumber'], -4));
+        $token->set_expiry_year($response['expyear']);
+        $token->set_expiry_month($response['expmonth']);
+        $token->set_card_type($response['ccbrand']);
+        $token->set_user_id(get_current_user_id());
+        // Save the new token to the database
+        $token->save();
+        // Set this token as the users new default token
+        WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
+    }
 
-            $order = new WC_Order($data['oid']);
-
-            //$chargetotal = $order->order_total;
-			 $chargetotal=$data['chargetotal'];
-			
-            $currency = $this->get_currency_code_by_country(get_woocommerce_currency());
-			
-			  
-            $txndatetime = $data['txndatetime'];
-            $approvalcode = $data['approval_code'];
-
-            if ($isNotify == true) {
-                $this->log('Hash Notify for Order Id: ' . $data['oid'], 'Info');
-                $hashValue = sha1(bin2hex($chargetotal . $sharedsecret . $currency . $txndatetime . $storename . $approvalcode));
-                if ($hashValue != $data['notification_hash']) {
-                    $this->log('Invalid Notification Hash received from gateway Order Id: ' . $data['oid'], 'Error');
-                    $return = false;
-                }
-            } else {
-                $this->log('Hash Response for Order Id: ' . $data['oid'], 'Info');
-                $hashValue = sha1(bin2hex($sharedsecret . $approvalcode . $chargetotal . $currency . $txndatetime . $storename));
-                if ($hashValue != $data['response_hash']) {
-                    $this->log('Invalid Response Hash received from gateway Order Id: ' . $data['oid'], 'Error');
-                    $return = false;
-                }
-            }
-
-            return $return;
+    /**
+     *  Get post data if set
+     * @since 1.4
+     */
+    function get_post_var($name)
+    {
+        if (isset($_POST[$name])) {
+            return wp_unslash($_POST[$name]);
         }
+        return NULL;
+    }
 
-        /**
-         * save_card function.
-         *
-         * @access public
-         * @param Object $response
-         * @return void
-         */
-        public function save_card($response) {
-            $this->log('Token for Txn Id : ' . $response['oid'] . ' is created', 'info');
-            $payment_token_from_gateway = $response['hosteddataid'];
-            // Build the token
-            $token = new WC_Payment_Token_CC();
-            $token->set_token($payment_token_from_gateway); // Token comes from payment processor
-            $token->set_gateway_id($this->id);
-            $token->set_last4(substr($response['cardnumber'], -4));
-            $token->set_expiry_year($response['expyear']);
-            $token->set_expiry_month($response['expmonth']);
-            $token->set_card_type($response['ccbrand']);
-            $token->set_user_id(get_current_user_id());
-            // Save the new token to the database
-            $token->save();
-            // Set this token as the users new default token
-            WC_Payment_Tokens::set_users_default(get_current_user_id(), $token->get_id());
-        }
+    // Validate fields
+    public function validate_fields()
+    {
+        return true;
+    }
 
-        /**
-         *  Get post data if set
-         * @since 1.4
-         */
-        function get_post_var($name) {
-            if (isset($_POST[$name])) {
-                return wp_unslash($_POST[$name]);
-            }
-            return NULL;
-        }
-
-        // Validate fields
-        public function validate_fields() {
-            return true;
-        }
-
-        /**
-         * Generate Localization Script html.
-         * 
-         * @return string
-         * */
-        public function generate_localization_html() {
-            ob_start();
-            ?>
+    /**
+     * Generate Localization Script html.
+     * 
+     * @return string
+     * */
+    public function generate_localization_html()
+    {
+        ob_start();
+        ?>
 
         <script type="text/javascript">
-            jQuery(function() {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-                var featuresSettings = eval( <?php echo json_encode(Firstdata_Utility::getFeatures()); ?> );
+            jQuery(function () {
+
+                var featuresSettings = eval(<?php echo json_encode(Firstdata_Utility::getFeatures()); ?>);
                 var countrySelected = '';
                 var resellerSelected = '';
-                jQuery('.country').change('click',function() {
-                    var country = jQuery( this ).val();
-                    if(featuresSettings.hasOwnProperty(country)){
+                jQuery('.country').change('click', function () {
+                    var country = jQuery(this).val();
+                    if (featuresSettings.hasOwnProperty(country)) {
                         countrySelected = featuresSettings[country];
                         var sellerOptions = "";
-                        for(var prop in countrySelected) {
+                        for (var prop in countrySelected) {
                             var sellerDetails = countrySelected[prop];
                             sellerOptions += "<option value='" + prop + "'>" + sellerDetails.reseller_name + "</option>";
                         }
                         jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').find('option').not(':first').remove();
-                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').append( sellerOptions );
+                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').append(sellerOptions);
                     }
-                    if(country == 'mex') {
+                    if (country == 'mex') {
                         jQuery('.delay-month').show();
                     } else {
                         jQuery('.delay-month').hide();
                     }
                 });
-                jQuery('.reseller').change('click',function() {
-                    resellerSelected = jQuery( this ).val();
-                                                           
+                jQuery('.reseller').change('click', function () {
+                    resellerSelected = jQuery(this).val();
+
                     var sellerDetails = countrySelected[resellerSelected];
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+
                     jQuery('.customer-details').html(sellerDetails.customer_detail_title);
                     jQuery('#fd-contact-detail-desc').html(sellerDetails.customer_detail);
                     jQuery('#fd-contact-support-desc').html(sellerDetails.contact_support);
                     jQuery('.description').val(sellerDetails.description + " " + sellerDetails.reseller_name);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-                    jQuery("#fd-plugin-logo").attr("src",sellerDetails.logo);   
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-                    if(sellerDetails.dynamic_merchant_name == 'yes'){
+
+                    jQuery("#fd-plugin-logo").attr("src", sellerDetails.logo);
+
+                    if (sellerDetails.dynamic_merchant_name == 'yes') {
                         jQuery('.dynamic-descriptor').closest('tr').show();
                     } else {
                         jQuery('.dynamic-descriptor').closest('tr').hide();
                     }
-                    if(sellerDetails.secure_pay == 'yes'){
+                    if (sellerDetails.secure_pay == 'yes') {
                         jQuery('.secure-pay').closest('tr').show();
                     } else {
                         jQuery('.secure-pay').closest('tr').hide();
                     }
-                    if(sellerDetails.dcc_skip_offer == 'yes'){
+                    if (sellerDetails.dcc_skip_offer == 'yes') {
                         jQuery('.dcc-skip-offer').closest('tr').show();
                     } else {
                         jQuery('.dcc-skip-offer').closest('tr').hide();
                     }
-                    if(sellerDetails.instalments == 'yes'){
+                    if (sellerDetails.instalments == 'yes') {
                         jQuery('.instalment-config').show();
                         jQuery(".instalment-config").next("table").show();
                     } else {
                         jQuery('.instalment-config').hide();
                         jQuery(".instalment-config").next("table").hide();
                     }
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+
                     /*Mexico Condition
                      * Added by Mom
                      */
-                    if(resellerSelected == "firstdatamexico"){
+                    if (resellerSelected == "firstdatamexico") {
                         jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").closest("tr").show();
                     }
-                    else{
+                    else {
                         jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").closest("tr").hide();
                         jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").attr('checked', false);
                     }
                     /*
                      * End OF Mexico Condition
                      */
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+
                     var localPayment = sellerDetails.local_payment;
-                    if(localPayment.length != 0) {
+                    if (localPayment.length != 0) {
                         var localPaymentOptions = "";
                         for (var paykey in localPayment) {
                             if (localPayment.hasOwnProperty(paykey)) {
                                 localPaymentOptions += "<option value='" + paykey + "'>" + localPayment[paykey] + "</option>";
                                 jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').find('option').remove();
-                                jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').append( localPaymentOptions );
+                                jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').append(localPaymentOptions);
                             }
-                        } 
+                        }
                         jQuery('.local-payment-method-title').show();
                         jQuery('.local-payment-method, .local-payment-method-options').closest('tr').show();
                     } else {
@@ -1181,26 +1220,26 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
                         jQuery('.local-payment-method, .local-payment-method-options').closest('tr').hide();
                     }
                 });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                jQuery('.local-payment-method').change('click',function() {
-                    if(jQuery(".local-payment-method").is(':checked')){ 
+
+                jQuery('.local-payment-method').change('click', function () {
+                    if (jQuery(".local-payment-method").is(':checked')) {
                         jQuery('.local-payment-method, .local-payment-method-options').closest('tr').show();
                     } else {
                         jQuery('.local-payment-method-options').closest('tr').hide();
                     }
                 });
-                jQuery('.ipg_rule_activation').on( 'click', function(){ 			
+                jQuery('.ipg_rule_activation').on('click', function () {
                     if (jQuery('#woocommerce_wanderlust_firstdata_gateway_rule_activation').is(":checked")) {
-                        jQuery("#multiple_payment_tr").fadeIn( "slow" );
+                        jQuery("#multiple_payment_tr").fadeIn("slow");
                     } else {
-                        jQuery("#multiple_payment_tr").fadeOut( "slow" );
-                    }		
+                        jQuery("#multiple_payment_tr").fadeOut("slow");
+                    }
                 });
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-                var prod_fields      = '.prod-trans-key, .prod-store-name, .prod-success-url, .prod-fail-url, .prod-notification-url'; 
-                var test_fields      = '.test-trans-key, .test-store-name, .test-success-url, .test-fail-url, .test-notification-url';
-                jQuery('.environment').change('click',function() {
-                    if(jQuery('.environment').val()==='TEST') {
+
+                var prod_fields = '.prod-trans-key, .prod-store-name, .prod-success-url, .prod-fail-url, .prod-notification-url';
+                var test_fields = '.test-trans-key, .test-store-name, .test-success-url, .test-fail-url, .test-notification-url';
+                jQuery('.environment').change('click', function () {
+                    if (jQuery('.environment').val() === 'TEST') {
                         jQuery(prod_fields).closest('tr').hide();
 
                         jQuery(test_fields).closest('tr').show();
@@ -1212,108 +1251,108 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
 
                     }
                 });
-        <?php
-        /*
-         * Display environment when page is loading =
-         */
-        if ($this->get_option('env') == "TEST" || $this->get_option('env') == '') {
-            echo "jQuery(prod_fields).closest('tr').hide();";
-            echo "jQuery(test_fields).closest('tr').show();";
-        } else {
-            echo "jQuery(prod_fields).closest('tr').show();";
-            echo "jQuery(test_fields).closest('tr').hide();";
-        }
-        if ($this->get_option('checkout') == "combinedpage" || $this->get_option('checkout') == '') {
-            echo "jQuery('.payment-mode').closest('tr').hide();";
-            echo "jQuery('.tokenisation').closest('tr').hide();";
-        }
-        /*
-         * Enable feature for reseller when loading page
-         */
-        $country = $this->get_option('country');
-        $feature = Firstdata_Utility::getFeatures();
-        $reseller = $this->get_option('reseller');
+                <?php
+                /*
+                 * Display environment when page is loading =
+                 */
+                if ($this->get_option('env') == "TEST" || $this->get_option('env') == '') {
+                    echo "jQuery(prod_fields).closest('tr').hide();";
+                    echo "jQuery(test_fields).closest('tr').show();";
+                } else {
+                    echo "jQuery(prod_fields).closest('tr').show();";
+                    echo "jQuery(test_fields).closest('tr').hide();";
+                }
+                if ($this->get_option('checkout') == "combinedpage" || $this->get_option('checkout') == '') {
+                    echo "jQuery('.payment-mode').closest('tr').hide();";
+                    echo "jQuery('.tokenisation').closest('tr').hide();";
+                }
+                /*
+                 * Enable feature for reseller when loading page
+                 */
+                $country = $this->get_option('country');
+                $feature = Firstdata_Utility::getFeatures();
+                $reseller = $this->get_option('reseller');
 
 
-        if (array_key_exists($country, $feature) && array_key_exists($reseller, $feature[$country])) {
-            $resellerFeatures = $feature[$country][$reseller];
-            ?>
-                        var countrySel = "<?php echo $this->get_option('country'); ?>";
-                        var sellerSel = "<?php echo $this->get_option('reseller'); ?>";
-                        var localPayment = '';
-                        if(featuresSettings.hasOwnProperty(countrySel)){
-                            countrySelected = featuresSettings[countrySel];
-                            var sellerOptions = "";
-                            for(var prop in countrySelected) {
-                                var sellerDetails = countrySelected[prop];
-                                if(prop === sellerSel){
-                                    localPayment = sellerDetails.local_payment;
-                                    jQuery("#fd-plugin-logo").attr("src",sellerDetails.logo);
-                                }
-                                sellerOptions += "<option value='" + prop + "'>" + sellerDetails.reseller_name + "</option>";
+                if (array_key_exists($country, $feature) && array_key_exists($reseller, $feature[$country])) {
+                    $resellerFeatures = $feature[$country][$reseller];
+                    ?>
+                    var countrySel = "<?php echo $this->get_option('country'); ?>";
+                    var sellerSel = "<?php echo $this->get_option('reseller'); ?>";
+                    var localPayment = '';
+                    if (featuresSettings.hasOwnProperty(countrySel)) {
+                        countrySelected = featuresSettings[countrySel];
+                        var sellerOptions = "";
+                        for (var prop in countrySelected) {
+                            var sellerDetails = countrySelected[prop];
+                            if (prop === sellerSel) {
+                                localPayment = sellerDetails.local_payment;
+                                jQuery("#fd-plugin-logo").attr("src", sellerDetails.logo);
                             }
+                            sellerOptions += "<option value='" + prop + "'>" + sellerDetails.reseller_name + "</option>";
+                        }
 
-                            if(typeof localPayment !== "undefined" || localPayment.length != 0) {
-                                var localPaymentOptions = "";
-                                var selectedLocalPay = eval(<?php echo json_encode($this->get_option('local_payment_method_options')); ?>);
-                                for (var paykey in localPayment) {
-                                    if (localPayment.hasOwnProperty(paykey)) {
-                                        var sel = "";
-                                        if( selectedLocalPay.indexOf(paykey) !='-1' ) {
-                                            sel = ' selected="selected"';
-                                        }
-                                        localPaymentOptions += "<option"+ sel +" value='" + paykey + "'>" + localPayment[paykey] + "</option>";
-                                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').find('option').remove();
-                                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').append( localPaymentOptions );
+                        if (typeof localPayment !== "undefined" || localPayment.length != 0) {
+                            var localPaymentOptions = "";
+                            var selectedLocalPay = eval(<?php echo json_encode($this->get_option('local_payment_method_options')); ?>);
+                            for (var paykey in localPayment) {
+                                if (localPayment.hasOwnProperty(paykey)) {
+                                    var sel = "";
+                                    if (selectedLocalPay.indexOf(paykey) != '-1') {
+                                        sel = ' selected="selected"';
                                     }
+                                    localPaymentOptions += "<option" + sel + " value='" + paykey + "'>" + localPayment[paykey] + "</option>";
+                                    jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').find('option').remove();
+                                    jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_local_payment_method_options[]"]').append(localPaymentOptions);
                                 }
                             }
-
-                            jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').find('option').not(':first').remove();
-                            jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').append( sellerOptions );
-                            jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"] option[value="'+sellerSel+'"]').attr("selected",true);
-
                         }
-                                    
-                        if(countrySel == 'mex') {
-                            jQuery('.delay-month').show();
-                        } else {
-                            jQuery('.delay-month').hide();
-                        }
-            <?php
-            if ($resellerFeatures['dynamic_merchant_name'] == 'yes') {
-                echo "jQuery('.dynamic-descriptor').closest('tr').show();";
-            } else {
-                echo "jQuery('.dynamic-descriptor').closest('tr').hide();";
-            }
-            if ($resellerFeatures['instalments'] == 'yes') {
-                echo "jQuery('.instalment-config').show();";
-                echo "jQuery('.instalment-config').next('table').show();";
-            } else {
-                echo "jQuery('.instalment-config').hide();";
-                echo "jQuery('.instalment-config').next('table').hide();";
-            }
-            if ($resellerFeatures['secure_pay'] == 'yes') {
-                echo "jQuery('.secure-pay').closest('tr').show();";
-            } else {
-                echo "jQuery('.secure-pay').closest('tr').hide();";
-            }
-            if ($resellerFeatures['dcc_skip_offer'] == 'yes') {
-                echo "jQuery('.dcc-skip-offer').closest('tr').show();";
-            } else {
-                echo "jQuery('.dcc-skip-offer').closest('tr').hide();";
-            }
-            if (!empty($resellerFeatures['local_payment'])) {
-                echo "jQuery('.local-payment-method-title').show();";
-                echo "jQuery('.local-payment-method, .local-payment-method-options').closest('tr').show();";
-            } else {
-                echo "jQuery('.local-payment-method-title').hide();";
-                echo "jQuery('.local-payment-method, .local-payment-method-options').closest('tr').hide();";
-            }
-        }
-        ?>
-                jQuery('.checkout-option').change('click',function() {
-                    if(jQuery('.checkout-option').val()==="combinedpage") {
+
+                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').find('option').not(':first').remove();
+                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"]').append(sellerOptions);
+                        jQuery('select[name="woocommerce_wanderlust_firstdata_gateway_reseller"] option[value="' + sellerSel + '"]').attr("selected", true);
+
+                    }
+
+                    if (countrySel == 'mex') {
+                        jQuery('.delay-month').show();
+                    } else {
+                        jQuery('.delay-month').hide();
+                    }
+                    <?php
+                    if ($resellerFeatures['dynamic_merchant_name'] == 'yes') {
+                        echo "jQuery('.dynamic-descriptor').closest('tr').show();";
+                    } else {
+                        echo "jQuery('.dynamic-descriptor').closest('tr').hide();";
+                    }
+                    if ($resellerFeatures['instalments'] == 'yes') {
+                        echo "jQuery('.instalment-config').show();";
+                        echo "jQuery('.instalment-config').next('table').show();";
+                    } else {
+                        echo "jQuery('.instalment-config').hide();";
+                        echo "jQuery('.instalment-config').next('table').hide();";
+                    }
+                    if ($resellerFeatures['secure_pay'] == 'yes') {
+                        echo "jQuery('.secure-pay').closest('tr').show();";
+                    } else {
+                        echo "jQuery('.secure-pay').closest('tr').hide();";
+                    }
+                    if ($resellerFeatures['dcc_skip_offer'] == 'yes') {
+                        echo "jQuery('.dcc-skip-offer').closest('tr').show();";
+                    } else {
+                        echo "jQuery('.dcc-skip-offer').closest('tr').hide();";
+                    }
+                    if (!empty($resellerFeatures['local_payment'])) {
+                        echo "jQuery('.local-payment-method-title').show();";
+                        echo "jQuery('.local-payment-method, .local-payment-method-options').closest('tr').show();";
+                    } else {
+                        echo "jQuery('.local-payment-method-title').hide();";
+                        echo "jQuery('.local-payment-method, .local-payment-method-options').closest('tr').hide();";
+                    }
+                }
+                ?>
+                jQuery('.checkout-option').change('click', function () {
+                    if (jQuery('.checkout-option').val() === "combinedpage") {
                         jQuery('.payment-mode').closest('tr').hide();
                         jQuery('.tokenisation').closest('tr').hide();
                     } else {
@@ -1324,16 +1363,16 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
                 /*
                  * Mexico reseller
                  *Added by mom*/
-                var sellerSel = "<?php echo $this->get_option('reseller'); ?>";	
-                if(sellerSel == "firstdatamexico"){
+                var sellerSel = "<?php echo $this->get_option('reseller'); ?>";
+                if (sellerSel == "firstdatamexico") {
                     jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").closest("tr").show();
                 } else {
                     jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").closest("tr").hide();
                     jQuery("#woocommerce_wanderlust_firstdata_gateway_interest_instalment").attr('checked', false);
                 }
 
-                var localMethod = "<?php echo $this->get_option('local_payment_method'); ?>";	
-                if(localMethod == "yes"){
+                var localMethod = "<?php echo $this->get_option('local_payment_method'); ?>";
+                if (localMethod == "yes") {
                     jQuery('.local-payment-method-options').closest('tr').show();
                 } else {
                     jQuery('.local-payment-method-options').closest('tr').hide();
@@ -1348,12 +1387,15 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
     /**
      * Do some additonal validation before saving options via the API.
      */
-    public function process_admin_options() {
+    public function process_admin_options()
+    {
         // If a certificate has been uploaded, read the contents and save that string instead.
-        if (array_key_exists('woocommerce_wanderlust_firstdata_gateway_server_trust_pem', $_FILES)
-                && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'])
-                && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'])
-                && $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem']['tmp_name'], "text/plain")) {
+        if (
+            array_key_exists('woocommerce_wanderlust_firstdata_gateway_server_trust_pem', $_FILES)
+            && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'])
+            && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'])
+            && $_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem']['tmp_name'], "text/plain")
+        ) {
 
             file_put_contents(dirname(__FILE__) . "/keys/ipg_online_trust.pem", file_get_contents($_FILES['woocommerce_wanderlust_firstdata_gateway_server_trust_pem']['tmp_name']));
             $_POST['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'] = str_replace('\\', '/', realpath(dirname(__FILE__)) . "/keys/ipg_online_trust.pem");
@@ -1363,10 +1405,12 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             $_POST['woocommerce_wanderlust_firstdata_gateway_server_trust_pem'] = $this->get_option('server_trust_pem');
         }
 
-        if (array_key_exists('woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile', $_FILES)
-                && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'])
-                && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'])
-                && $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile']['tmp_name'], "text/plain")) {
+        if (
+            array_key_exists('woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile', $_FILES)
+            && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'])
+            && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'])
+            && $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile']['tmp_name'], "text/plain")
+        ) {
 
             file_put_contents(dirname(__FILE__) . "/keys/client_certificate.pem", file_get_contents($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile']['tmp_name']));
             $_POST['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'] = str_replace('\\', '/', realpath(dirname(__FILE__)) . "/keys/client_certificate.pem");
@@ -1376,10 +1420,12 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
             $_POST['woocommerce_wanderlust_firstdata_gateway_client_certificate_pemfile'] = $this->get_option('client_certificate_pemfile');
         }
 
-        if (array_key_exists('woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile', $_FILES)
-                && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile'])
-                && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile'])
-                && $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile']['tmp_name'], "text/plain")) {
+        if (
+            array_key_exists('woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile', $_FILES)
+            && array_key_exists('tmp_name', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile'])
+            && array_key_exists('size', $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile'])
+            && $_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile']['size'] && $this->file_validate($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile']['tmp_name'], "text/plain")
+        ) {
 
             file_put_contents(dirname(__FILE__) . "/keys/client_certificate.key", file_get_contents($_FILES['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile']['tmp_name']));
             $_POST['woocommerce_wanderlust_firstdata_gateway_client_certificate_keyfile'] = str_replace('\\', '/', realpath(dirname(__FILE__)) . "/keys/client_certificate.key");
@@ -1395,7 +1441,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         //$this->validate_active_credentials();
     }
 
-    public function file_validate($file_url = '', $mimetype = '') {
+    public function file_validate($file_url = '', $mimetype = '')
+    {
         $mime = "Notset";
         $isValid = false;
         if (file_exists($file_url)) {
@@ -1414,15 +1461,17 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @param  WC_Order $order
      * @return bool
      */
-    public function can_refund_order($order) {
+    public function can_refund_order($order)
+    {
         return $order && $order->get_transaction_id();
     }
 
     /**
      * Init the API class and set the username/password etc.
      */
-    protected function init_api() {
-        include_once( dirname(__FILE__) . '/includes/firstdata-api-handler.php' );
+    protected function init_api()
+    {
+        include_once(dirname(__FILE__) . '/includes/firstdata-api-handler.php');
 
         Firstdata_API_Handler::$api_url = $url = $this->getDetails('apiurl');
         Firstdata_API_Handler::$api_username = $this->get_option('api_username');
@@ -1440,7 +1489,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @param  string $reason
      * @return bool|WP_Error
      */
-    public function process_refund($order_id, $amount = null, $reason = '') {
+    public function process_refund($order_id, $amount = null, $reason = '')
+    {
         $this->log('Refund Order Id : ' . $order_id);
         $order = wc_get_order($order_id);
         if (!$this->can_refund_order($order)) {
@@ -1495,7 +1545,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         return isset($result->ipgapi_ErrorMessage) ? new WP_Error('error', $result->ipgapi_ErrorMessage) : false;
     }
 
-    public function getCardSupportLocalPay($method, $type = 'C') {
+    public function getCardSupportLocalPay($method, $type = 'C')
+    {
         $paymentMethodOption = $this->paymentOptionsValue();
         $checkoutValidation = true;
         if (array_key_exists($method, $paymentMethodOption)) {
@@ -1519,15 +1570,18 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * Return Validation Error
      */
 
-    public function checkout_card_validation() {
-    
-    if($_POST['payment_method'] == 'wanderlust_firstdata_gateway' ){
-    
+    public function checkout_card_validation()
+    {
+
+        if ($_POST['payment_method'] == 'wanderlust_firstdata_gateway') {
+
             $token_id = $this->get_post_var('wc-' . $this->id . '-payment-token');
             $paymentMethod = $this->get_post_var('local_payment_option');
-            if ($this->authorization == 'hidden' &&
-                    ($token_id == 'new' || $token_id == '') &&
-                    $this->getCardSupportLocalPay($paymentMethod) == true) {
+            if (
+                $this->authorization == 'hidden' &&
+                ($token_id == 'new' || $token_id == '') &&
+                $this->getCardSupportLocalPay($paymentMethod) == true
+            ) {
 
                 $cardNumber = str_replace(" ", "", $this->get_post_var($this->id . '-card-number'));
                 $cardExpiry = str_replace(" ", "", $this->get_post_var($this->id . '-card-expiry'));
@@ -1562,36 +1616,112 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
                     wc_add_notice(__('Card CVC is Invalid.', 'woocommerce-firstdata'), 'error');
                 }
             }
-         } 
+        }
     }
 
-    public function get_currency_code_by_country($counryCode) {
+    public function get_currency_code_by_country($counryCode)
+    {
         $allCountryCode = array(
-            'MYR' => '458', 'PLN' => '985', 'NOK' => '578', 'RUB' => '643',
-            'AED' => '784', 'CNY' => '156', 'KRW' => '410', 'ILS' => '376',
-            'SAR' => '682', 'TRY' => '949', 'HKD' => '344', 'HUF' => '348',
-            'KWD' => '414', 'INR' => '356', 'RON' => '946', 'SGD' => '702',
-            'MXN' => '484', 'AUD' => '036', 'NZD' => '554', 'EEK' => '233',
-            'LTL' => '440', 'USD' => '840', 'ZAR' => '710', 'BRL' => '986',
-            'CAD' => '124', 'JPY' => '392', 'SEK' => '752', 'CZK' => '203',
-            'DKK' => '208', 'NGN' => '566', 'EUR' => '978', 'GBP' => '826',
-            'CHF' => '756', 'HRK' => '191', 'BHD' => '048', 'QAR' => '634',
-            'THB' => '764', 'BND' => '096', 'MAD' => '504', 'TND' => '788',
-            'BIF' => '108', 'BYN' => '933', 'ARS' => '032', 'CLP' => '152',
-            'BDT' => '050', 'KES' => '404', 'MUR' => '480', 'NPR' => '524',
-            'BYR' => '974', 'MDL' => '498', 'BOB' => '068', 'PYG' => '600',
-            'NAD' => '516', 'DZD' => '012', 'BBD' => '052', 'OMR' => '512',
-            'BSD' => '044', 'BZD' => '084', 'KYD' => '136', 'GTQ' => '320',
-            'DOP' => '214', 'GYD' => '328', 'JMD' => '388', 'ANG' => '532',
-            'AWG' => '533', 'XOF' => '952', 'TTD' => '780', 'XCD' => '951',
-            'SRD' => '968', 'UGX' => '800', 'MMK' => '104', 'CRC' => '188',
-            'UYU' => '858', 'COP' => '170', 'EGP' => '818', 'FJD' => '242',
-            'IDR' => '360', 'AFN' => '971', 'IQD' => '368', 'IRR' => '364',
-            'ISK' => '352', 'LAK' => '418', 'LKR' => '144', 'JOD' => '400',
-            'MOP' => '446', 'PHP' => '608', 'PKR' => '586', 'SCR' => '690',
-            'TWD' => '901', 'BMD' => '060', 'VND' => '704', 'PEN' => '604',
-            'RSD' => '941', 'KZT' => '398', 'BWP' => '072', 'TZS' => '834',
-            'BGN' => '975', 'AZN' => '944', 'UAH' => '980', 'LBP' => '422'
+            'MYR' => '458',
+            'PLN' => '985',
+            'NOK' => '578',
+            'RUB' => '643',
+            'AED' => '784',
+            'CNY' => '156',
+            'KRW' => '410',
+            'ILS' => '376',
+            'SAR' => '682',
+            'TRY' => '949',
+            'HKD' => '344',
+            'HUF' => '348',
+            'KWD' => '414',
+            'INR' => '356',
+            'RON' => '946',
+            'SGD' => '702',
+            'MXN' => '484',
+            'AUD' => '036',
+            'NZD' => '554',
+            'EEK' => '233',
+            'LTL' => '440',
+            'USD' => '840',
+            'ZAR' => '710',
+            'BRL' => '986',
+            'CAD' => '124',
+            'JPY' => '392',
+            'SEK' => '752',
+            'CZK' => '203',
+            'DKK' => '208',
+            'NGN' => '566',
+            'EUR' => '978',
+            'GBP' => '826',
+            'CHF' => '756',
+            'HRK' => '191',
+            'BHD' => '048',
+            'QAR' => '634',
+            'THB' => '764',
+            'BND' => '096',
+            'MAD' => '504',
+            'TND' => '788',
+            'BIF' => '108',
+            'BYN' => '933',
+            'ARS' => '032',
+            'CLP' => '152',
+            'BDT' => '050',
+            'KES' => '404',
+            'MUR' => '480',
+            'NPR' => '524',
+            'BYR' => '974',
+            'MDL' => '498',
+            'BOB' => '068',
+            'PYG' => '600',
+            'NAD' => '516',
+            'DZD' => '012',
+            'BBD' => '052',
+            'OMR' => '512',
+            'BSD' => '044',
+            'BZD' => '084',
+            'KYD' => '136',
+            'GTQ' => '320',
+            'DOP' => '214',
+            'GYD' => '328',
+            'JMD' => '388',
+            'ANG' => '532',
+            'AWG' => '533',
+            'XOF' => '952',
+            'TTD' => '780',
+            'XCD' => '951',
+            'SRD' => '968',
+            'UGX' => '800',
+            'MMK' => '104',
+            'CRC' => '188',
+            'UYU' => '858',
+            'COP' => '170',
+            'EGP' => '818',
+            'FJD' => '242',
+            'IDR' => '360',
+            'AFN' => '971',
+            'IQD' => '368',
+            'IRR' => '364',
+            'ISK' => '352',
+            'LAK' => '418',
+            'LKR' => '144',
+            'JOD' => '400',
+            'MOP' => '446',
+            'PHP' => '608',
+            'PKR' => '586',
+            'SCR' => '690',
+            'TWD' => '901',
+            'BMD' => '060',
+            'VND' => '704',
+            'PEN' => '604',
+            'RSD' => '941',
+            'KZT' => '398',
+            'BWP' => '072',
+            'TZS' => '834',
+            'BGN' => '975',
+            'AZN' => '944',
+            'UAH' => '980',
+            'LBP' => '422'
         );
         if (array_key_exists($counryCode, $allCountryCode)) {
             return $allCountryCode[$counryCode];
@@ -1608,7 +1738,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @param string $level   Optional. Default 'info'.
      *     emergency|alert|critical|error|warning|notice|info|debug
      */
-    public static function log($message, $level = 'info') {
+    public static function log($message, $level = 'info')
+    {
         if (self::$log_enabled) {
             if (empty(self::$log)) {
                 self::$log = wc_get_logger();
@@ -1622,7 +1753,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @return reseller detail
      */
 
-    public function getDetails($type) {
+    public function getDetails($type)
+    {
         $return = '';
 
         $country = $this->get_option('country');
@@ -1673,7 +1805,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @return Title
      */
 
-    public function getPluginTitle() {
+    public function getPluginTitle()
+    {
         $return = '';
         $country = $this->get_option('country');
         $feature = Firstdata_Utility::getFeatures();
@@ -1692,7 +1825,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @return Description
      */
 
-    public function getDescription() {
+    public function getDescription()
+    {
         $return = $this->get_option('description') != '' ? $this->get_option('description') : 'First Data Gateway extension for WooCommerce';
         return __($return, $this->id);
     }
@@ -1701,25 +1835,27 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * Plugin logo for selected Reseller
      * @return logo
      */
-     
-      public function thankyou_page($order_id) {
-           
-          $order = wc_get_order( $order_id );
-          
-        
-           
-          if($_POST['endpointTransactionId']){
+
+    public function thankyou_page($order_id)
+    {
+
+        $order = wc_get_order($order_id);
+
+
+
+        if ($_POST['endpointTransactionId']) {
             $order->add_order_note(
-              'FirstData: ' .
-              __( 'Payment approved.', 'wc-gateway-pagos360' )
+                'FirstData: ' .
+                __('Payment approved.', 'wc-gateway-pagos360')
             );
             $order->payment_complete();
-          }
-           
-          
         }
 
-    public function getIcon() {
+
+    }
+
+    public function getIcon()
+    {
         $return = null;
         if ($this->get_option('logo') == 'yes') {
             $country = $this->get_option('country');
@@ -1732,7 +1868,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
         return __($return, $this->id);
     }
 
-    public function getCardType() {
+    public function getCardType()
+    {
         $return = null;
         $country = $this->get_option('country');
         $feature = Firstdata_Utility::getFeatures();
@@ -1749,7 +1886,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @return logo
      */
 
-    public function checkLogo() {
+    public function checkLogo()
+    {
         $return = null;
         $country = $this->get_option('country');
         $feature = Firstdata_Utility::getFeatures();
@@ -1775,7 +1913,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @param  string $name
      * @return string
      */
-    public function field_name($name) {
+    public function field_name($name)
+    {
         return ' name="' . esc_attr($this->id . '-' . $name) . '" ';
     }
 
@@ -1784,7 +1923,8 @@ class WANDERLUST_Firstdata_Gateway extends WC_Payment_Gateway {
      * @return Hashvalue
      * 
      */
-    function createRequestHash($txndatetime, $chargetotal, $currency) {
+    function createRequestHash($txndatetime, $chargetotal, $currency)
+    {
         if ($this->env == "TEST") {
             $storename = $this->test_store_name;
             $sharedsecret = $this->test_trans_key;
